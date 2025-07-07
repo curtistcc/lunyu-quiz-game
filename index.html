@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>論語智慧小測驗</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the game */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-grey background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 2.5rem; /* Increased padding */
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* Space between sections */
+        }
+        .question-text {
+            font-size: 1.5rem; /* Larger font for questions */
+            font-weight: 700; /* Bold */
+            color: #2d3748; /* Darker text */
+            margin-bottom: 1.5rem;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.75rem;
+            background-color: #e2e8f0; /* Light grey for options */
+            color: #4a5568; /* Dark grey text */
+            border-radius: 0.75rem; /* Rounded buttons */
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-size: 1.1rem;
+            border: 2px solid transparent; /* Default transparent border */
+        }
+        .option-button:hover {
+            background-color: #cbd5e0; /* Slightly darker on hover */
+        }
+        .option-button.selected {
+            background-color: #a0aec0; /* Selected option color */
+            color: #ffffff;
+            border-color: #4a5568; /* Border for selected */
+        }
+        .option-button.correct {
+            background-color: #48bb78; /* Green for correct */
+            color: #ffffff;
+            border-color: #2f855a;
+        }
+        .option-button.incorrect {
+            background-color: #f56565; /* Red for incorrect */
+            color: #ffffff;
+            border-color: #c53030;
+        }
+        .action-button {
+            background-color: #4299e1; /* Blue for action buttons */
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+        }
+        .action-button:hover {
+            background-color: #3182ce; /* Darker blue on hover */
+            transform: translateY(-2px);
+        }
+        .action-button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .feedback-message {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            font-weight: 600;
+            white-space: pre-wrap; /* Preserve newlines in explanation */
+            text-align: left; /* Align explanation to left */
+        }
+        .feedback-correct {
+            color: #2f855a; /* Dark green */
+        }
+        .feedback-incorrect {
+            color: #c53030; /* Dark red */
+        }
+        .result-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+        .result-screen h2 {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        .result-screen p {
+            font-size: 1.25rem;
+            color: #4a5568;
+        }
+        /* Modal styles removed as per user request */
+        /* .modal, .modal-content, .close-button, .loader, #interpretationContent, #interpretationText, #interpretationLoader are no longer needed */
+
+        .start-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .start-screen input {
+            padding: 0.75rem 1rem;
+            border: 2px solid #cbd5e0;
+            border-radius: 0.5rem;
+            width: 80%;
+            max-width: 300px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .question-count-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .question-count-button {
+            background-color: #a0aec0;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            border: none;
+        }
+        .question-count-button.selected-count {
+            background-color: #4299e1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .question-count-button:hover {
+            background-color: #6a7c8e;
+        }
+        .timer-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e53e3e; /* Red for timer */
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer" class="game-container">
+        <!-- Game Title -->
+        <h1 class="text-3xl font-bold text-gray-800">論語智慧小測驗</h1>
+        <p class="text-lg text-gray-600 mb-4">仁、孝、君子之道</p>
+
+        <!-- Start Screen (Initially visible) -->
+        <div id="startScreen" class="start-screen">
+            <p class="text-xl text-gray-700">歡迎來到論語智慧小測驗！</p>
+            <p class="text-md text-gray-600">請輸入您的姓名以開始測驗：</p>
+            <input type="text" id="userNameInput" placeholder="您的姓名 (必填)" maxlength="20" required class="focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <p id="nameInputError" class="text-red-500 text-sm hidden">請輸入您的姓名！</p>
+            <p class="text-md text-gray-600 mt-4">請選擇題目數量：</p>
+            <div id="questionCountOptions" class="question-count-options">
+                <button class="question-count-button" data-count="30">30 題</button>
+                <button class="question-count-button" data-count="60">60 題</button>
+                <button class="question-count-button" data-count="90">90 題</button>
+                <button class="question-count-button" data-count="50_timed">50 題 (限時)</button>
+                <button class="question-count-button selected-count" data-count="all">全部</button>
+            </div>
+            <button id="startButton" class="action-button mt-6">開始測驗</button>
+        </div>
+
+        <!-- Question and Options Area (Initially hidden) -->
+        <div id="quizArea" class="hidden">
+            <p id="timerDisplay" class="timer-display hidden">剩餘時間: 30 秒</p>
+            <p id="questionText" class="question-text"></p>
+            <div id="optionsContainer" class="flex flex-col gap-3">
+                <!-- Options will be dynamically loaded here -->
+            </div>
+            <p id="feedbackMessage" class="feedback-message"></p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+                <!-- Deep Interpretation Button removed as per user request -->
+                <button id="nextButton" class="action-button">下一題</button>
+            </div>
+        </div>
+
+        <!-- Result Screen (Initially hidden) -->
+        <div id="resultScreen" class="result-screen hidden">
+            <h2>測驗完成！</h2>
+            <p id="finalScoreText" class="text-xl"></p>
+            <p id="finalCommentText" class="text-lg"></p>
+            <p id="saveStatusMessage" class="text-base text-gray-500"></p>
+            <button id="restartButton" class="action-button mt-6">再玩一次</button>
+        </div>
+
+        <!-- Game Info Area -->
+        <div class="flex justify-between items-center text-gray-700 text-lg mt-4">
+            <span id="scoreDisplay">得分: 0</span>
+            <span id="progressDisplay">進度: 0/0</span>
+        </div>
+        <div class="text-sm text-gray-500 mt-2">
+            您的使用者ID: <span id="userIdDisplay">載入中...</span>
+        </div>
+    </div>
+
+    <!-- Deep Interpretation Modal removed as per user request -->
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase variables
+        let app;
+        let db;
+        let auth;
+        let userId = 'loading...'; // Default loading state for userId
+        let userName = '匿名使用者'; // Default user name
+
+        // Hardcoded Firebase Config as provided by user
+        const firebaseConfig = {
+          apiKey: "AIzaSyAIHF84mcr3dUpnrrod113d9egsN52dFjU",
+          authDomain: "junzi-da378.firebaseapp.com",
+          projectId: "junzi-da378",
+          storageBucket: "junzi-da378.firebasestorage.app",
+          messagingSenderId: "389066490290",
+          appId: "1:389066490290:web:614fd674117ccd62cd24ab",
+          measurementId: "G-X1XEP4NY3J"
+        };
+        const appId = firebaseConfig.appId; // Use the appId from the new config
+
+        // Initialize Firebase
+        if (Object.keys(firebaseConfig).length > 0) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Listen for auth state changes to get the user ID
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                } else {
+                    // Sign in anonymously if no user is authenticated
+                    try {
+                        // No __initial_auth_token is provided by user, so use signInAnonymously
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser?.uid || crypto.randomUUID();
+                    } catch (error) {
+                        console.error("Firebase authentication failed:", error);
+                        userId = 'authentication-failed';
+                    }
+                }
+                document.getElementById('userIdDisplay').textContent = userId;
+            });
+        } else {
+            console.warn("Firebase config not found. Score saving will not work.");
+            document.getElementById('userIdDisplay').textContent = '未配置Firebase';
+        }
+
+        // Array of quiz questions with detailed explanations and hints
+        // Each question now has an 'id' for tracking and a 'topic' for adaptive questioning.
+        const allQuestions = [
+            // 論仁
+            {
+                id: 'r1', topic: '論仁', question: "孔子認為「不仁者」在貧困時會如何？",
+                options: ["安於貧困", "難以長久處於貧困", "利用貧困", "抱怨貧困"], correctAnswer: 1,
+                explanation: "不仁者缺乏內在道德支撐，無法在逆境中堅守原則，也無法在安樂中保持清醒。", hints: ["提示：思考缺乏仁德的人，其內心是否能真正安穩。"]
+            },
+            {
+                id: 'r2', topic: '論仁', question: "孔子認為「不仁者不可以久處約，不可以長處樂」的原因是什麼？",
+                options: ["他們缺乏智慧", "他們沒有足夠的財富", "他們缺乏內在的道德支撐", "他們不被他人理解"], correctAnswer: 2,
+                explanation: "不仁者缺乏內在的道德支撐，無法在逆境中堅守原則，也無法在順境中保持清醒和不放縱。", hints: ["提示：孔子強調仁德是內在的支撐，沒有它，無論順逆都難以持久。"]
+            },
+            {
+                id: 'r3', topic: '論仁', question: "孔子認為「仁者」對仁德的態度是？",
+                options: ["利用仁德", "安於仁德", "懼怕仁德", "追求名利"], correctAnswer: 1,
+                explanation: "「安仁」指仁德的人實行仁德便心安理得，因為仁德是他們內在的本性，他們樂於踐行。", hints: ["提示：孔子將仁德分為兩個層次：一個是發自內心的認同，一個是基於功利考量。"]
+            },
+            {
+                id: 'r4', topic: '論仁', question: "在《論語．論仁》中，「安仁」是哪種人的表現？",
+                options: ["仁者", "知者", "勇者", "小人"], correctAnswer: 0,
+                explanation: "「安仁」是仁者的表現，指仁德的人實行仁德便心安理得，因為仁德是他們內在的本性。", hints: ["提示：這是對仁德的最高境界。"]
+            },
+            {
+                id: 'r5', topic: '論仁', question: "在《論語．論仁》中，「利仁」是哪種人的表現？",
+                options: ["仁者", "知者", "勇者", "志士仁人"], correctAnswer: 1,
+                explanation: "「利仁」是知者的表現，指有智慧的人懂得仁德的好處，並從中獲得益處。", hints: ["提示：這是從功利角度理解仁德。"]
+            },
+            {
+                id: 'r6', topic: '論仁', question: "孔子認為人們對富貴和貧賤的態度分別是？",
+                options: ["富貴嚮往，貧賤厭惡", "富貴厭惡，貧賤嚮往", "富貴無所謂，貧賤厭惡", "富貴嚮往，貧賤無所謂"], correctAnswer: 0,
+                explanation: "根據《論語．里仁》：「富與貴，是人之所欲也；貧與賤，是人之所惡也。」人們嚮往富貴，厭惡貧賤。", hints: ["提示：這是人性的普遍趨向。"]
+            },
+            {
+                id: 'r7', topic: '論仁', question: "根據孔子，君子對於不以正道得來的富貴，會如何處理？",
+                options: ["欣然接受", "不接受", "假裝拒絕", "先接受再說"], correctAnswer: 1,
+                explanation: "孔子指出：「不以其道得之，不處也。」「不處」即不接受。", hints: ["提示：君子行事，首重道義，而非個人得失。"]
+            },
+            {
+                id: 'r8', topic: '論仁', question: "孔子強調君子即使在倉卒或困頓之時，也不能違背什麼？",
+                options: ["禮儀", "仁德", "規矩", "原則"], correctAnswer: 1,
+                explanation: "「君子無終食之間違仁，造次必於是，顛沛必於是。」強調仁德是君子立身處世的根本，必須時刻堅守。", hints: ["提示：這是君子品格的內核，不可動搖。"]
+            },
+            {
+                id: 'r9', topic: '論仁', question: "「君子無終食之間違仁」一句，強調了仁德對於君子的哪一特性？",
+                options: ["廣泛性", "持久性", "重要性", "普遍性"], correctAnswer: 1,
+                explanation: "「君子無終食之間違仁」強調仁德的「持久性」或「一貫性」。即使在吃一頓飯的短暫時間內，君子都不會違背仁德。", hints: ["提示：這句話強調仁德在時間上的表現。"]
+            },
+            {
+                id: 'r10', topic: '論仁', question: "根據《論語》引文，「仁」與「道」的關係是什麼？",
+                options: ["仁是道的外在表現，道是仁的內在精神", "仁是道的基礎，道是仁的目標", "仁是道的根本，道是仁的途徑", "仁與道沒有直接關係"], correctAnswer: 2,
+                explanation: "「道」是正當方法，「仁」是君子立身成名的根本。仁是原則，道是途徑。", hints: ["提示：仁是內在的德行，道是外在的途徑。"]
+            },
+            {
+                id: 'r11', topic: '論仁', question: "根據《論語》，君子在什麼情況下會背離仁德？",
+                options: ["在富貴和貧賤之間選擇時", "在倉卒或困頓之時", "在生命受到威脅時", "君子不會背離仁德"], correctAnswer: 3,
+                explanation: "君子無論在任何情況下，即使是倉卒或困頓之時，都不會違背仁德。志士仁人更是「殺身以成仁」。", hints: ["提示：仁德是君子的根本，不可棄。"]
+            },
+            {
+                id: 'r12', topic: '論仁', question: "仁者對「富貴貧賤」的看法是什麼？",
+                options: ["追求富貴，厭惡貧賤", "不以其道得之，不處也；不以其道得之，不去也", "隨遇而安，不論富貴貧賤", "只追求精神財富"], correctAnswer: 1,
+                explanation: "仁者對待富貴和貧賤都必須符合「道」。不以正道得來的富貴，不接受；不以正道擺脫的貧賤，不逃避。", hints: ["提示：君子重義輕利。"]
+            },
+            {
+                id: 'r13', topic: '論仁', question: "仁者對「生死」的看法是什麼？",
+                options: ["追求長生不老", "苟且偷生，避免死亡", "無求生以害仁，有殺身以成仁", "生死有命，順其自然"], correctAnswer: 2,
+                explanation: "仁者不會為了保全生命而損害仁德，反而會為了成就仁德而犧牲自己的生命。", hints: ["提示：這是捨生取義的精神。"]
+            },
+            {
+                id: 'r14', topic: '論仁', question: "仁者對「富貴貧賤」和「生死」的看法與「仁」的中心意義有何關係？",
+                options: ["這些看法與仁的中心意義無關", "這些看法是仁的具體表現，體現了仁者重義輕利、捨生取義的精神", "這些看法是為了追求個人利益", "這些看法是為了避免災禍"], correctAnswer: 1,
+                explanation: "這些看法是仁的具體表現，體現了仁者重義輕利、捨生取義的精神，將仁德置於一切之上。", hints: ["提示：仁是核心價值。"]
+            },
+            {
+                id: 'r15', topic: '論仁', question: "一位企業家投資偏遠地區的環保項目，既改善了當地環境，也為自己的企業帶來了良好的社會形象和長期收益。根據孔子思想，這位企業家的行為最接近哪種人？",
+                options: ["知者", "仁者", "志士仁人", "小人"], correctAnswer: 0,
+                explanation: "企業家能夠發現問題根源並採取行動，從中獲得了利益。這體現了「知者利仁」的範疇。", hints: ["提示：他從中獲得了實際的利益。"]
+            },
+            {
+                id: 'r16', topic: '論仁', question: "顏淵問仁，孔子回答仁的根本實踐方法是什麼？",
+                options: ["愛人", "克己復禮", "博學", "孝順"], correctAnswer: 1,
+                explanation: "孔子回答：「克己復禮為仁。」指克制私慾，使言行舉止都符合禮儀規範。", hints: ["提示：這是孔子對仁的具體實踐方法論。"]
+            },
+            {
+                id: 'r17', topic: '論仁', question: "孔子提出的「克己復禮」是指什麼？",
+                options: ["約束自己，實踐禮儀", "克服困難，恢復禮制", "自我反省，遵守規矩", "克制慾望，復興舊制"], correctAnswer: 0,
+                explanation: "「克己復禮」指克制自己的私慾，使言行舉止都符合禮儀規範。這是一種由內而外的修養過程。", hints: ["提示：這個方法強調的是對自身行為的約束和規範。"]
+            },
+            {
+                id: 'r18', topic: '論仁', question: "「克己復禮」的具體實踐包括哪四個方面？",
+                options: ["非禮勿聽、勿看、勿言、勿動", "非禮勿視、勿聽、勿言、勿動", "非禮勿思、勿言、勿行、勿動", "非禮勿視、勿想、勿說、勿做"], correctAnswer: 1,
+                explanation: "孔子明確指出：「非禮勿視，非禮勿聽，非禮勿言，非禮勿動。」要求人們在視覺、聽覺、言語和行動上，都必須遵循禮的規範。", hints: ["提示：它們涵蓋了人的感知、表達和行動。"]
+            },
+            {
+                id: 'r19', topic: '論仁', question: "顏淵在聽了孔子關於「克己復禮」的教誨後，表示會如何？",
+                options: ["表示懷疑", "請事斯語矣", "認為難以做到", "要求更多解釋"], correctAnswer: 1,
+                explanation: "顏淵回答說：「回雖不敏，請事斯語矣。」表明他會努力遵從孔子的教誨，將其付諸實踐。", hints: ["提示：顏淵對老師的教誨表現出謙遜和實踐的決心。"]
+            },
+            {
+                id: 'r20', topic: '論仁', question: "志士仁人對於生命和仁德的選擇，孔子認為應當如何？",
+                options: ["求生以害仁", "殺身以成仁", "仁義與生命並重", "先保全生命再談仁義"], correctAnswer: 1,
+                explanation: "《衛靈公》第十五章中提到：「志士仁人，無求生以害仁，有殺身以成仁。」真正的志士仁人，會為了成就仁德而犧牲自己的生命。", hints: ["提示：這是儒家思想中對道德原則的最高堅守。"]
+            },
+            {
+                id: 'r21', topic: '論仁', question: "在《論語．論仁》中，「成仁」是哪種人的表現？",
+                options: ["知者", "君子", "勇者", "志士仁人"], correctAnswer: 3, // Changed from "仁者" to "君子"
+                explanation: "「成仁」是志士仁人的表現，指他們為了成就仁德而犧牲自己的生命。", hints: ["提示：這是將仁德置於生命之上的崇高精神。"]
+            },
+            {
+                id: 'r22', topic: '論仁', question: "在《論語．論仁》中，「害仁」的意思是？",
+                options: ["傷害他人", "損害仁德", "危害自己", "放棄仁德"], correctAnswer: 1,
+                explanation: "「害仁」指因個人私利或苟且偷生而損害仁德。", hints: ["提示：這是與仁德相悖的行為。"]
+            },
+            {
+                id: 'r23', topic: '論仁', question: "孔子認為在生命受到威脅時，暫時放下仁德是情有可原的，這句話是正確還是錯誤？",
+                options: ["正確", "錯誤"], correctAnswer: 1,
+                explanation: "孔子認為志士仁人不會為了求生而損害仁德，因此生命受到威脅時放下仁德是不被允許的。", hints: ["提示：這是儒家對道德原則的最高堅守。"]
+            },
+            {
+                id: 'r24', topic: '論仁', question: "「約」在「不仁者，不可以久處約」中是什麼意思？",
+                options: ["貧困、困境", "約束、限制", "節約、儉樸", "約定、契約"], correctAnswer: 0,
+                explanation: "「約」在此處指貧困、困境。", hints: ["提示：想想不仁者在逆境中的表現。"]
+            },
+            {
+                id: 'r25', topic: '論仁', question: "「利仁」在「知者利仁」中是什麼意思？",
+                options: ["因於己有利而行仁", "利用仁德佔便宜", "利刃、武器", "利索、迅速"], correctAnswer: 0,
+                explanation: "「利仁」指有智慧的人懂得仁德帶來的好處，並因此而行仁。", hints: ["提示：這是一種功利性的考量。"]
+            },
+            {
+                id: 'r26', topic: '論仁', question: "「其道」在「不以其道得之」中是什麼意思？",
+                options: ["他的道路", "正當方法", "道理、原則", "特定方式"], correctAnswer: 1,
+                explanation: "「其道」指正當的方法或途徑。", hints: ["提示：君子行事講求正義。"]
+            },
+            {
+                id: 'r27', topic: '論仁', question: "「不處」在「不以其道得之，不處也」中是什麼意思？",
+                options: ["不居住", "不接受", "不處理", "不參與"], correctAnswer: 1,
+                explanation: "「不處」指不處身其中，即不接受、不享受。", hints: ["提示：君子對不正當得來的東西的態度。"]
+            },
+            {
+                id: 'r28', topic: '論仁', question: "「終食之間」在「君子無終食之間違仁」中是什麼意思？",
+                options: ["一整天的時間", "吃一頓飯的短暫時間", "飯後休息時間", "終身的時間"], correctAnswer: 1,
+                explanation: "「終食之間」指吃一頓飯的短暫時間，強調仁德的時刻不離。", hints: ["提示：時間非常短暫。"]
+            },
+            {
+                id: 'r29', topic: '論仁', question: "「造次」在「造次必於是」中是什麼意思？",
+                options: ["製造次序", "倉卒、匆忙之時", "再次造訪", "隨意、輕率"], correctAnswer: 1,
+                explanation: "「造次」指倉卒、匆忙之時。", hints: ["提示：君子在緊急情況下的表現。"]
+            },
+            {
+                id: 'r30', topic: '論仁', question: "「顛沛」在「顛沛必於是」中是什麼意思？",
+                options: ["跌倒、摔跤", "困頓、流離之時", "顛倒是非", "顛覆、推翻"], correctAnswer: 1,
+                explanation: "「顛沛」指困頓、流離之時。", hints: ["提示：君子在艱難處境下的表現。"]
+            },
+            {
+                id: 'r31', topic: '論仁', question: "孔子將仁德分為哪兩種境界？",
+                options: ["安仁與利仁", "求生與害仁", "克己與復禮", "坦蕩與戚戚"], correctAnswer: 0,
+                explanation: "孔子將仁德分為「安仁」和「利仁」兩種境界。", hints: ["提示：孔子對仁的層次劃分。"]
+            },
+            {
+                id: 'r32', topic: '論仁', question: "為何說「不仁者」無法「久處約」？",
+                options: ["因為他們缺乏物質基礎", "因為他們無法在逆境中堅守原則", "因為他們容易放棄", "因為他們不被社會認可"], correctAnswer: 1,
+                explanation: "不仁者缺乏內在道德支撐，無法在逆境中堅守原則。", hints: ["提示：仁德是內在的支撐。"]
+            },
+            {
+                id: 'r33', topic: '論仁', question: "君子對待富貴和貧賤的共同原則是什麼？",
+                options: ["追求最大利益", "符合正當方法", "隨遇而安", "避免一切麻煩"], correctAnswer: 1,
+                explanation: "君子對待富貴和貧賤都必須符合「道」，即正當的方法。", hints: ["提示：君子行事講求道義。"]
+            },
+            {
+                id: 'r34', topic: '論仁', question: "君子「去仁」的後果是什麼？",
+                options: ["會變得富有", "無法成就其名聲", "會得到權力", "會變得快樂"] , correctAnswer: 1,
+                explanation: "「君子去仁，惡乎成名？」君子若離開仁德，就無法成就其名聲。", hints: ["提示：仁德是君子立身之本。"]
+            },
+            {
+                id: 'r35', topic: '論仁', question: "君子在任何時間、任何境遇下都不能偏離什麼？",
+                options: ["財富", "名聲", "仁德", "權力"], correctAnswer: 2,
+                explanation: "君子無論在任何時間、任何境遇下，都不能偏離仁德。", hints: ["提示：這是君子品格的內核。"]
+            },
+            {
+                id: 'r36', topic: '論仁', question: "「一日克己復禮，天下歸仁焉」強調了什麼？",
+                options: ["行仁的困難性", "行仁的巨大影響力", "行仁需要長時間", "行仁需要他人幫助"], correctAnswer: 1,
+                explanation: "強調只要個人能做到克己復禮，就能對天下產生巨大影響。", hints: ["提示：個人修養對社會的作用。"]
+            },
+            {
+                id: 'r37', topic: '論仁', question: "「為仁由己，而由人乎哉？」這句話表明了行仁的什麼特點？",
+                options: ["由外在環境決定", "由他人影響", "由個人主動自覺", "由命運安排"], correctAnswer: 2,
+                explanation: "這句話強調行仁完全是個人主動自覺的行為，不由他人決定。", hints: ["提示：行仁的自主性。"]
+            },
+            {
+                id: 'r38', topic: '論仁', question: "顏淵所問的「其目」是指什麼？",
+                options: ["眼睛", "具體條目或細則", "目標", "名目"], correctAnswer: 1,
+                explanation: "「其目」指克己復禮的具體條目或細則。", hints: ["提示：顏淵想知道如何具體實踐。"]
+            },
+            {
+                id: 'r39', topic: '論仁', question: "志士仁人將什麼置於生命之上？",
+                options: ["財富", "權力", "仁德", "名聲"], correctAnswer: 2,
+                explanation: "志士仁人將仁德置於生命之上，體現捨生取義。", hints: ["提示：這是最高的價值追求。"]
+            },
+            {
+                id: 'r40', topic: '論仁', question: "「殺身以成仁」體現了儒家思想中的哪種精神？",
+                options: ["追求長生", "苟且偷生", "捨生取義", "個人主義"], correctAnswer: 2,
+                explanation: "「殺身以成仁」體現了捨生取義的崇高精神。", hints: ["提示：生命與道義的選擇。"]
+            },
+            {
+                id: 'r41', topic: '論仁', question: "孔子認為不仁者在安樂的環境中會如何？",
+                options: ["能長久享受", "無法長久處於安樂", "變得更加仁慈", "失去自我"], correctAnswer: 1,
+                explanation: "不仁者缺乏內在道德支撐，不能長久地處在安樂的境地。", hints: ["提示：不仁者在順境中的表現。"]
+            },
+            {
+                id: 'r42', topic: '論仁', question: "孔子認為「知者利仁」中的「利」是何種意義？",
+                options: ["對自己有利", "對他人有利", "對社會有利", "對國家有利"], correctAnswer: 0,
+                explanation: "「利仁」指有智慧的人懂得仁德對自己有利，而因此去行仁。", hints: ["提示：考慮其功利性。"]
+            },
+            {
+                id: 'r43', topic: '論仁', question: "君子對待貧賤的正確方法是什麼？",
+                options: ["盡力擺脫貧賤", "不以不正當方法擺脫貧賤", "接受貧賤", "抱怨貧賤"], correctAnswer: 1,
+                explanation: "君子對貧賤的態度是「不以其道得之，不去也」，即不以不正當方法擺脫。", hints: ["提示：君子對待逆境的原則。"]
+            },
+            {
+                id: 'r44', topic: '論仁', question: "「惡乎成名」中的「惡乎」是什麼意思？",
+                options: ["哪裡", "為何", "如何", "什麼"], correctAnswer: 0,
+                explanation: "「惡乎」在此處是「哪裡」的意思，表示反問語氣。", hints: ["提示：一個古漢語疑問詞。"]
+            },
+            {
+                id: 'r45', topic: '論仁', question: "孔子說「一日克己復禮，天下歸仁焉」，這句話的深層含義是？",
+                options: ["只要一天做到克己復禮，天下就會歸於仁", "強調個人修養對社會的巨大影響", "行仁只是一日之事", "天下歸仁是自然發生的"], correctAnswer: 1,
+                explanation: "強調個人修養達到仁的境界，能夠感化他人，對社會產生巨大影響。", hints: ["提示：從個人到天下的影響。"]
+            },
+            {
+                id: 'r46', topic: '論仁', question: "顏淵說「回雖不敏」，他是在表達什麼？",
+                options: ["自己不聰明", "自己不夠勤奮", "自己不夠謙虛", "自己不願學習"], correctAnswer: 0,
+                explanation: "「不敏」指不夠聰敏，是顏淵的謙詞。", hints: ["提示：顏淵的自謙之詞。"]
+            },
+            {
+                id: 'r47', topic: '論仁', question: "志士仁人為何不會「求生以害仁」？",
+                options: ["因為他們不怕死", "因為他們將仁德看得比生命更重要", "因為他們沒有求生的慾望", "因為他們知道求生無用"], correctAnswer: 1,
+                explanation: "志士仁人將仁德置於生命之上，不會為了保全生命而損害仁德。", hints: ["提示：仁德的至高無上。"]
+            },
+            {
+                id: 'r48', topic: '論仁', question: "君子在追求富貴時，應當遵循什麼原則？",
+                options: ["不擇手段", "以正當方法", "以最快速度", "以最大利益"], correctAnswer: 1,
+                explanation: "君子應當以正當方法追求富貴，否則不處也。", hints: ["提示：君子的道德底線。"]
+            },
+            {
+                id: 'r49', topic: '論仁', question: "「仁者安仁，知者利仁」中，「安仁」與「利仁」的層次高低如何？",
+                options: ["安仁高於利仁", "利仁高於安仁", "兩者層次相同", "無法比較"], correctAnswer: 0,
+                explanation: "「安仁」是發自內心的認同和實踐，是仁的最高境界，高於功利性的「利仁」。", hints: ["提示：一個是本性，一個是功用。"]
+            },
+            {
+                id: 'r50', topic: '論仁', question: "「非禮勿視」強調了什麼？",
+                options: ["不要看任何東西", "不要看違反禮節的事物", "不要看美好的事物", "不要看他人的隱私"], correctAnswer: 1,
+                explanation: "「非禮勿視」指不看違反禮節的事物，是克己復禮的具體表現。", hints: ["提示：視覺的約束。"]
+            },
+            {
+                id: 'r51', topic: '論仁', question: "「非禮勿聽」強調了什麼？",
+                options: ["不要聽任何聲音", "不要聽違反禮節的言論", "不要聽他人的秘密", "不要聽不喜歡的音樂"], correctAnswer: 1,
+                explanation: "「非禮勿聽」指不聽違反禮節的言論，是克己復禮的具體表現。", hints: ["提示：聽覺的約束。"]
+            },
+            {
+                id: 'r52', topic: '論仁', question: "「非禮勿言」強調了什麼？",
+                options: ["不要說話", "不要說違反禮節的言語", "不要說謊", "不要說空話"], correctAnswer: 1,
+                explanation: "「非禮勿言」指不說違反禮節的言語，是克己復禮的具體表現。", hints: ["提示：言語的約束。"]
+            },
+            {
+                id: 'r53', topic: '論仁', question: "「非禮勿動」強調了什麼？",
+                options: ["不要行動", "不要做違反禮節的行為", "不要輕舉妄動", "不要多管閒事"], correctAnswer: 1,
+                explanation: "「非禮勿動」指不做違反禮節的行為，是克己復禮的具體表現。", hints: ["提示：行動的約束。"]
+            },
+            {
+                id: 'r54', topic: '論仁', question: "「克己復禮為仁」中，「為仁」的關鍵在於誰？",
+                options: ["君主", "老師", "自己", "他人"], correctAnswer: 2,
+                explanation: "「為仁由己」強調行仁在於個人主動自覺。", hints: ["提示：行仁的主體。"]
+            },
+            {
+                id: 'r55', topic: '論仁', question: "志士仁人「殺身以成仁」的行為，對社會有何啟示？",
+                options: ["鼓勵人們犧牲生命", "強調道德原則的至高無上", "提倡個人英雄主義", "鼓勵人們逃避現實"], correctAnswer: 1,
+                explanation: "強調道德原則的至高無上，為後世樹立了捨生取義的榜樣。", hints: ["提示：這種行為的社會意義。"]
+            },
+            {
+                id: 'r56', topic: '論仁', question: "孔子對「富與貴」和「貧與賤」的態度，體現了其什麼樣的價值觀？",
+                options: ["重利輕義", "重義輕利", "義利並重", "不關心利益"], correctAnswer: 1,
+                explanation: "孔子強調「不以其道得之，不處也」，體現了重義輕利的價值觀。", hints: ["提示：君子對待物質的態度。"]
+            },
+            {
+                id: 'r57', topic: '論仁', question: "「君子無終食之間違仁」表明仁德是君子生活的哪一部分？",
+                options: ["偶爾為之", "重要但非必需", "時刻堅守的根本", "只在特定場合表現"], correctAnswer: 2,
+                explanation: "仁德是君子時刻堅守的根本，不可片刻離開。", hints: ["提示：仁德的持續性。"]
+            },
+            {
+                id: 'r58', topic: '論仁', question: "顏淵問仁，孔子為何不直接給出一個簡單的定義，而是強調「克己復禮」？",
+                options: ["因為仁無法定義", "因為仁是實踐而非概念", "因為顏淵不理解", "因為孔子想考驗顏淵"], correctAnswer: 1,
+                explanation: "孔子認為仁是需要通過具體實踐才能達到的境界，而非簡單的概念。", hints: ["提示：仁的本質。"]
+            },
+            {
+                id: 'r59', topic: '論仁', question: "「不仁者，不可以久處約，不可以長處樂」這句話的結構特點是什麼？",
+                options: ["對偶", "排比", "比喻", "反問"], correctAnswer: 0,
+                explanation: "這句話運用了對偶的修辭手法，使語句對稱，意義鮮明。", hints: ["提示：句子的形式美。"]
+            },
+            {
+                id: 'r60', topic: '論仁', question: "「仁者安仁，知者利仁」中，「安」和「利」的區別是什麼？",
+                options: ["安是自然，利是功利", "安是功利，利是自然", "安是外在，利是內在", "安是短期，利是長期"], correctAnswer: 0,
+                explanation: "「安」指發自內心的自然而然，而「利」則帶有功利性考量。", hints: ["提示：動機的不同。"]
+            },
+            {
+                id: 'r61', topic: '論仁', question: "「富與貴，是人之所欲也」這句話說明了人們對富貴的什麼態度？",
+                options: ["厭惡", "嚮往", "無所謂", "害怕"], correctAnswer: 1,
+                explanation: "「所欲」即所希望、嚮往的。", hints: ["提示：人類的普遍慾望。"]
+            },
+            {
+                id: 'r62', topic: '論仁', question: "「貧與賤，是人之所惡也」這句話說明了人們對貧賤的什麼態度？",
+                options: ["厭惡", "嚮往", "無所謂", "接受"], correctAnswer: 0,
+                explanation: "「所惡」即所厭惡的。", hints: ["提示：人類的普遍厭惡。"]
+            },
+            {
+                id: 'r63', topic: '論仁', question: "「不以其道得之，不處也」中的「其道」指的是什麼？",
+                options: ["自己的方法", "正當的方法", "不正當的方法", "快速的方法"], correctAnswer: 1,
+                explanation: "「其道」指正當的方法或途徑。", hints: ["提示：君子行事的原則。"]
+            },
+            {
+                id: 'r64', topic: '論仁', question: "「君子去仁，惡乎成名？」這句話強調了仁德對君子而言的什麼重要性？",
+                options: ["獲得財富", "成就名聲", "得到權力", "獲得快樂"], correctAnswer: 1,
+                explanation: "君子若離開仁德，就無法成就其名聲。", hints: ["提示：仁德是君子立身之本。"]
+            },
+            {
+                id: 'r65', topic: '論仁', question: "「造次必於是，顛沛必於是」這句話強調了仁德在君子生命中的哪種狀態？",
+                options: ["只在順境中", "只在逆境中", "無論順逆都堅守", "只在特定時刻"], correctAnswer: 2,
+                explanation: "無論在倉卒或困頓之時，君子都必須堅守仁德。", hints: ["提示：仁德的普遍性。"]
+            },
+            {
+                id: 'r66', topic: '論仁', question: "「為仁由己」強調了行仁的什麼特性？",
+                options: ["被動性", "依賴性", "主動性", "偶然性"], correctAnswer: 2,
+                explanation: "「為仁由己」指行仁完全由個人主動自覺。", hints: ["提示：行仁的來源。"]
+            },
+            {
+                id: 'r67', topic: '論仁', question: "「非禮勿視、非禮勿聽、非禮勿言、非禮勿動」這四句話的核心思想是什麼？",
+                options: ["克制慾望", "遵守禮節", "避免錯誤", "追求完美"], correctAnswer: 1,
+                explanation: "這四句話是「克己復禮」的具體實踐，核心在於遵守禮節規範。", hints: ["提示：行為的準則。"]
+            },
+            {
+                id: 'r68', topic: '論仁', question: "顏淵說「回雖不敏，請事斯語矣」，這句話體現了顏淵什麼樣的學習態度？",
+                options: ["驕傲自滿", "謙虛好學", "懷疑不信", "敷衍了事"], correctAnswer: 1,
+                explanation: "顏淵自謙不敏，但表示會努力實踐，體現了謙虛好學的態度。", hints: ["提示：弟子的態度。"]
+            },
+            {
+                id: 'r69', topic: '論仁', question: "「志士仁人，無求生以害仁，有殺身以成仁」這句話對「仁」的境界有何提升？",
+                options: ["將仁提升到與生命等同的地位", "將仁提升到超越生命的最高境界", "將仁降低到次要地位", "仁與生命無關"], correctAnswer: 1,
+                explanation: "這句話將仁提升到超越生命的最高境界，強調為仁可以犧牲生命。", hints: ["提示：仁的至高無上。"]
+            },
+            {
+                id: 'r70', topic: '論仁', question: "「不仁者，不可以久處樂」的原因是什麼？",
+                options: ["他們不習慣安樂", "他們會放縱自己，最終迷失", "他們會被他人嫉妒", "他們無法享受快樂"], correctAnswer: 1,
+                explanation: "不仁者缺乏內在約束，在安樂中容易放縱自己，最終迷失。", hints: ["提示：不仁者在順境中的表現。"]
+            },
+            {
+                id: 'r71', topic: '論仁', question: "「知者利仁」中的「知」指的是什麼？",
+                options: ["知識", "智慧", "知道", "認識"], correctAnswer: 1,
+                explanation: "「知」在此處指智慧，有智慧的人懂得仁德帶來的好處。", hints: ["提示：一種能力。"]
+            },
+            {
+                id: 'r72', topic: '論仁', question: "君子「不以其道得之，不去也」中的「去」是什麼意思？",
+                options: ["離開", "除去", "逃避", "放棄"], correctAnswer: 2,
+                explanation: "「去」在此處指逃避、擺脫。", hints: ["提示：君子對待貧賤的態度。"]
+            },
+            {
+                id: 'r73', topic: '論仁', question: "「惡乎成名」中的「成名」指的是什麼？",
+                options: ["成為名人", "成就其名聲和品德", "獲得財富", "獲得權力"], correctAnswer: 1,
+                explanation: "「成名」指成就其名聲和品德，君子之名與仁德相關。", hints: ["提示：名聲的內涵。"]
+            },
+            {
+                id: 'r74', topic: '論仁', question: "「造次必於是，顛沛必於是」這句話的「是」指的是什麼？",
+                options: ["正確的", "仁德", "這裡", "如此"], correctAnswer: 1,
+                explanation: "「是」在此處指仁德，強調在任何情況下都堅守仁德。", hints: ["提示：所指的對象。"]
+            },
+            {
+                id: 'r75', topic: '論仁', question: "「為仁由己」這句話對個人修養有何重要啟示？",
+                options: ["修養是天生的", "修養需要他人監督", "修養是個人主動的責任", "修養是次要的"], correctAnswer: 2,
+                explanation: "啟示修養是個人主動的責任，不能推卸給他人或環境。", hints: ["提示：修養的自主性。"]
+            },
+            {
+                id: 'r76', topic: '論仁', question: "「非禮勿視」對現代人的行為有何指導意義？",
+                options: ["不要看任何不好的東西", "應當選擇性地接收信息，避免不良影響", "不要看新聞", "不要看手機"], correctAnswer: 1,
+                explanation: "啟示應當選擇性地接收信息，避免不良影響，保持心靈純淨。", hints: ["提示：信息篩選。"]
+            },
+            {
+                id: 'r77', topic: '論仁', question: "「非禮勿聽」對現代人的行為有何指導意義？",
+                options: ["不要聽任何閒言碎語", "應當避免聽取不道德或不健康的言論", "不要聽音樂", "不要聽他人意見"], correctAnswer: 1,
+                explanation: "啟示應當避免聽取不道德或不健康的言論，保持思想純正。", hints: ["提示：聽覺的選擇。"]
+            },
+            {
+                id: 'r78', topic: '論仁', question: "「非禮勿言」對現代人的行為有何指導意義？",
+                options: ["不要說話", "應當謹慎言辭，避免說出不符合道德或禮儀的話", "不要發表意見", "不要說真話"], correctAnswer: 1,
+                explanation: "啟示應當謹慎言辭，避免說出不符合道德或禮儀的話，維護良好溝通。", hints: ["提示：言語的規範。"]
+            },
+            {
+                id: 'r79', topic: '論仁', question: "「非禮勿動」對現代人的行為有何指導意義？",
+                options: ["不要行動", "應當規範自己的行為，不做不符合道德或法律的事情", "不要參與社會活動", "不要表達情感"], correctAnswer: 1,
+                explanation: "啟示應當規範自己的行為，不做不符合道德或法律的事情，維護社會秩序。", hints: ["提示：行動的規範。"]
+            },
+            {
+                id: 'r80', topic: '論仁', question: "「志士仁人，無求生以害仁」這句話強調了什麼？",
+                options: ["生命高於一切", "仁德高於生命", "生命與仁德同等重要", "生命可以犧牲仁德"], correctAnswer: 1,
+                explanation: "強調仁德高於生命，志士仁人不會為了求生而損害仁德。", hints: ["提示：仁德的優先級。"]
+            },
+            {
+                id: 'r81', topic: '論仁', question: "「不仁者，不可以久處約，不可以長處樂」這句話反映了孔子對人性的什麼看法？",
+                options: ["人性本善", "人性本惡", "人性需要道德約束", "人性是自由的"], correctAnswer: 2,
+                explanation: "反映了孔子認為人性需要道德約束，缺乏仁德則難以在順逆境中保持穩定。", hints: ["提示：道德約束的重要性。"]
+            },
+            {
+                id: 'r82', topic: '論仁', question: "「仁者安仁」中，「安」的深層含義是什麼？",
+                options: ["安靜", "安穩", "心安理得，自然而然", "安逸享受"], correctAnswer: 2,
+                explanation: "「安」指仁者實行仁德便心安理得，是發自內心的自然而然。", hints: ["提示：內心的狀態。"]
+            },
+            {
+                id: 'r83', topic: '論仁', question: "「知者利仁」中，「利」的深層含義是什麼？",
+                options: ["利益", "有利於他人", "有利於社會", "有利於自己，從而實踐仁德"], correctAnswer: 3,
+                explanation: "「利」指有智慧的人懂得仁德對自己有利，從而實踐仁德。", hints: ["提示：功利性的驅動。"]
+            },
+            {
+                id: 'r84', topic: '論仁', question: "孔子對「富與貴」和「貧與賤」的態度，與其「中庸」思想有何關聯？",
+                options: ["沒有關聯", "體現了不偏不倚，不為外物所累的態度", "強調極端追求", "強調完全放棄"], correctAnswer: 1,
+                explanation: "體現了不偏不倚，不為外物所累的態度，無論順逆都堅守仁德，符合中庸之道。", hints: ["提示：中庸的體現。"]
+            },
+            {
+                id: 'r85', topic: '論仁', question: "「君子無終食之間違仁」強調了仁德在君子生命中的哪種滲透性？",
+                options: ["表面化", "深層次，無時無刻", "偶爾為之", "只在關鍵時刻"], correctAnswer: 1,
+                explanation: "強調仁德深層次地滲透到君子生活的每一個細節，無時無刻不堅守。", hints: ["提示：仁德的深度。"]
+            },
+            {
+                id: 'r86', topic: '論仁', question: "「克己復禮為仁」中，「復禮」的目的是什麼？",
+                options: ["恢復古代禮制", "使言行符合禮儀規範", "推翻現有禮制", "創造新的禮制"], correctAnswer: 1,
+                explanation: "「復禮」指使言行符合禮儀規範，是個人行為的約束。", hints: ["提示：目的在於規範自身。"]
+            },
+            {
+                id: 'r87', topic: '論仁', question: "「為仁由己，而由人乎哉？」這句話的修辭手法是什麼？",
+                options: ["比喻", "排比", "反問", "對偶"], correctAnswer: 2,
+                explanation: "這句話運用了反問的修辭手法，加強語氣，強調行仁的主動性。", hints: ["提示：疑問句的強調作用。"]
+            },
+            {
+                id: 'r88', topic: '論仁', question: "「志士仁人」中的「志士」指的是什麼？",
+                options: ["有抱負的人", "有志向的人", "有學問的人", "有權力的人"], correctAnswer: 1,
+                explanation: "「志士」指有遠大志向、堅定信念的人。", hints: ["提示：對理想的追求。"]
+            },
+            {
+                id: 'r89', topic: '論仁', question: "「殺身以成仁」的行為，在儒家思想中被視為一種什麼樣的壯舉？",
+                options: ["愚蠢的", "無意義的", "崇高的", "自私的"], correctAnswer: 2,
+                explanation: "被視為一種崇高的壯舉，體現了為道德理想犧牲的精神。", hints: ["提示：儒家對此行為的評價。"]
+            },
+            {
+                id: 'r90', topic: '論仁', question: "孔子對「仁」的定義，是單一的還是多層次的？",
+                options: ["單一的", "多層次的", "模糊的", "不確定的"], correctAnswer: 1,
+                explanation: "孔子對「仁」的定義是多層次的，例如「安仁」、「利仁」、「克己復禮」等，因材施教。", hints: ["提示：孔子因人而異的教導方式。"]
+            },
+
+            // 論孝 (繼續擴充至總數180題)
+            {
+                id: 'x41', topic: '論孝', question: "「生，事之以禮；死，葬之以禮，祭之以禮」這句話中的三個「禮」字，強調了孝順的什麼？",
+                options: ["形式", "內涵", "時間", "地點"], correctAnswer: 0,
+                explanation: "這句話中的三個「禮」字，強調了孝順在形式上的規範和莊重。", hints: ["提示：孝順的儀式性。"]
+            },
+            {
+                id: 'x42', topic: '論孝', question: "子游問孝，孔子為何要特別指出「今之孝者，是謂能養」的不足？",
+                options: ["因為供養不重要", "因為僅有物質供養而無敬意，與養動物無異", "因為子游很富有", "因為孔子不重視物質"], correctAnswer: 1,
+                explanation: "孔子指出僅有物質供養而無敬意，與飼養動物無異，強調精神層面的重要性。", hints: ["提示：孝道的更高要求。"]
+            },
+            {
+                id: 'x43', topic: '論孝', question: "「事父母幾諫」中的「幾」字，除了「輕微」和「細微」外，還暗示了規勸的什麼特點？",
+                options: ["頻繁", "及時", "隱微", "嚴厲"], correctAnswer: 2,
+                explanation: "「幾」字暗示規勸要隱微，不宜直言，以避免傷害父母尊嚴。", hints: ["提示：規勸的策略。"]
+            },
+            {
+                id: 'x44', topic: '論孝', question: "當父母不聽從子女的規勸時，子女「又敬不違」體現了什麼？",
+                options: ["盲目順從", "在不違背大原則下，仍保持恭敬與順從", "放棄規勸", "與父母爭執"], correctAnswer: 1,
+                explanation: "即使父母不聽勸告，子女仍應在不違背大原則的前提下，保持恭敬與順從。", hints: ["提示：孝順的彈性。"]
+            },
+            {
+                id: 'x45', topic: '論孝', question: "「勞而不怨」的「勞」和「怨」分別指什麼？",
+                options: ["勞累和抱怨", "擔憂和怨恨", "勞動和不滿", "辛勞和憤怒"], correctAnswer: 1,
+                explanation: "「勞」指擔憂，「怨」指怨恨。即使擔憂，也不應心生怨恨。", hints: ["提示：兩種情感。"]
+            },
+            {
+                id: 'x46', topic: '論孝', question: "「父母之年，不可不知也」這句話，為何要「一則以喜，一則以懼」？",
+                options: ["喜父母長壽，懼父母衰老", "喜父母健康，懼父母生病", "喜父母有智慧，懼父母會離去", "喜自己長大，懼父母變老"], correctAnswer: 0,
+                explanation: "喜父母高壽，慶幸父母仍在；懼父母年事已高，生命有限。", hints: ["提示：喜憂參半的情感。"]
+            },
+            {
+                id: 'x47', topic: '論孝', question: "孔子對孝道的闡述，強調了孝順的哪兩個重要層面？",
+                options: ["物質與精神", "順從與獨立", "形式與實質", "個人與社會"], correctAnswer: 0,
+                explanation: "孔子強調孝順不僅是物質供養，更重要的是精神層面的敬意和關懷。", hints: ["提示：孝道的雙重性。"]
+            },
+            {
+                id: 'x48', topic: '論孝', question: "「無違」作為孝道的總綱，其核心精神是什麼？",
+                options: ["絕對服從", "不違背禮節規範", "不讓父母操心", "孝順父母的一切要求"], correctAnswer: 1,
+                explanation: "「無違」的核心精神是不違背禮節規範，所有孝行都應符合禮。", hints: ["提示：孝道的原則。"]
+            },
+            {
+                id: 'x49', topic: '論孝', question: "孔子對孝道的闡述，與其「仁」的思想有何關聯？",
+                options: ["孝是仁的基礎和實踐", "孝與仁無關", "仁是孝的結果", "孝是仁的阻礙"], correctAnswer: 0,
+                explanation: "孝是仁的基礎和具體實踐，通過孝道可以培養仁德。", hints: ["提示：孝與仁的關係。"]
+            },
+            {
+                id: 'x50', topic: '論孝', question: "「事父母幾諫」中，子女為何不能「直諫」？",
+                options: ["害怕父母", "直諫可能傷害父母尊嚴，影響親情", "直諫沒有效果", "孔子不允許直諫"], correctAnswer: 1,
+                explanation: "直諫可能傷害父母尊嚴，影響親情，因此應委婉規勸。", hints: ["提示：規勸的藝術。"]
+            },
+            {
+                id: 'x51', topic: '論孝', question: "「見志不從」中的「志」指的是什麼？",
+                options: ["志向", "心意、意見", "意志", "記錄"], correctAnswer: 1,
+                explanation: "「志」在此處指子女規勸父母的心意或意見。", hints: ["提示：子女的表達。"]
+            },
+            {
+                id: 'x52', topic: '論孝', question: "「又敬不違」中的「敬」指的是什麼？",
+                options: ["敬畏", "尊敬", "敬愛", "恭敬的態度"], correctAnswer: 3,
+                explanation: "「敬」在此處指恭敬的態度，即使父母不聽勸告，仍要保持恭敬。", hints: ["提示：孝順的態度。"]
+            },
+            {
+                id: 'x53', topic: '論孝', question: "「勞而不怨」這句話，體現了子女對父母的哪種深層情感？",
+                options: ["不滿", "無奈", "擔憂與無私的愛", "抱怨"], correctAnswer: 2,
+                explanation: "體現了子女對父母的擔憂與無私的愛，即使不被理解也無怨無悔。", hints: ["提示：愛與情感的表達。"]
+            },
+            {
+                id: 'x54', topic: '論孝', question: "孔子對孝道的闡述，是否強調子女對父母的絕對服從？",
+                options: ["是", "否", "部分是", "視情況而定"], correctAnswer: 1,
+                explanation: "否。孔子強調「幾諫」，表明孝道並非絕對服從，而是有原則的順從。", hints: ["提示：孝順的界限。"]
+            },
+            {
+                id: 'x55', topic: '論孝', question: "「父母之年，不可不知也」這句話，對子女的責任有何啟示？",
+                options: ["子女應承擔父母的全部責任", "子女應了解父母的生命階段，盡力履行孝道", "子女應避免了解父母的年齡", "子女應讓父母獨立生活"], correctAnswer: 1,
+                explanation: "啟示子女應了解父母的生命階段，盡力履行孝道，珍惜相處時光。", hints: ["提示：孝順的責任。"]
+            },
+            {
+                id: 'x56', topic: '論孝', question: "「生，事之以禮」中的「事」是什麼意思？",
+                options: ["事情", "侍奉", "辦事", "服務"], correctAnswer: 1,
+                explanation: "「事」在此處指侍奉。", hints: ["提示：對父母的行為。"]
+            },
+            {
+                id: 'x57', topic: '論孝', question: "「葬之以禮」中的「葬」是什麼意思？",
+                options: ["埋葬", "安葬", "喪事", "祭祀"], correctAnswer: 1,
+                explanation: "「葬」在此處指安葬。", hints: ["提示：對逝去父母的行為。"]
+            },
+            {
+                id: 'x58', topic: '論孝', question: "「祭之以禮」中的「祭」是什麼意思？",
+                options: ["祭拜", "祭祀", "節日", "慶祝"], correctAnswer: 1,
+                explanation: "「祭」在此處指祭祀。", hints: ["提示：對逝去父母的儀式。"]
+            },
+            {
+                id: 'x59', topic: '論孝', question: "子游問孝中，孔子為何用「犬馬」作對比？",
+                options: ["強調人不如動物", "強調僅物質供養不足以區分人與動物的孝", "強調動物也需要照顧", "強調人應該像動物一樣簡單"], correctAnswer: 1,
+                explanation: "孔子用犬馬作對比，旨在強調僅物質供養不足以區分人與動物的孝，缺乏敬意則無意義。", hints: ["提示：對比的目的。"]
+            },
+            {
+                id: 'x60', topic: '論孝', question: "「事父母幾諫」這句話，對子女在與父母溝通方面有何啟示？",
+                options: ["應當直接指出父母錯誤", "應當避免與父母溝通", "應當選擇合適的時機和方式委婉規勸", "應當完全聽從父母意見"], correctAnswer: 2,
+                explanation: "啟示子女應當選擇合適的時機和方式委婉規勸父母，以維護親情。", hints: ["提示：溝通的藝術。"]
+            },
+            {
+                id: 'x61', topic: '論孝', question: "「見志不從，又敬不違」這句話，體現了子女在規勸父母不從後，應保持的哪種態度？",
+                options: ["憤怒", "失望", "恭敬與堅持", "放棄"], correctAnswer: 2,
+                explanation: "即使父母不聽從，子女仍應保持恭敬，不違背大原則，同時堅持孝心。", hints: ["提示：孝順的韌性。"]
+            },
+            {
+                id: 'x62', topic: '論孝', question: "「父母之年，一則以喜，一則以懼」這句話，體現了孝順的哪種情感深度？",
+                options: ["單純的快樂", "複雜而深刻的愛與擔憂", "無所謂的態度", "害怕衰老"], correctAnswer: 1,
+                explanation: "體現了子女對父母複雜而深刻的愛與擔憂，既為長壽高興，也為生命有限而憂懼。", hints: ["提示：情感的層次。"]
+            },
+            {
+                id: 'x63', topic: '論孝', question: "孔子對孝道的闡述，對家庭倫理有何重要意義？",
+                options: ["破壞家庭和睦", "奠定家庭倫理的基礎，強調尊重與愛", "提倡個人主義", "鼓勵子女反抗父母"], correctAnswer: 1,
+                explanation: "孔子對孝道的闡述奠定了家庭倫理的基礎，強調子女對父母的尊重與愛，促進家庭和睦。", hints: ["提示：家庭關係的基石。"]
+            },
+            {
+                id: 'x64', topic: '論孝', question: "「無違」的原則，在現代社會中如何理解和實踐？",
+                options: ["子女應無條件服從父母", "子女應在尊重父母的前提下，理性判斷並遵循社會規範", "子女應避免與父母產生分歧", "子女應只聽從自己的意見"], correctAnswer: 1,
+                explanation: "在現代社會中，應理解為在尊重父母的前提下，理性判斷並遵循社會規範，而非盲目服從。", hints: ["提示：現代孝道的詮釋。"]
+            },
+            {
+                id: 'x65', topic: '論孝', question: "「今之孝者，是謂能養」這句話反映了當時社會對孝的什麼普遍理解？",
+                options: ["重視精神供養", "重視物質供養", "重視孝順的儀式", "重視孝順的規勸"], correctAnswer: 1,
+                explanation: "這句話反映了當時社會普遍認為只要能供養父母物質生活就是孝。", hints: ["提示：當時的普遍觀念。"]
+            },
+            {
+                id: 'x66', topic: '論孝', question: "孔子對孝道的闡述，對個人品德修養有何影響？",
+                options: ["培養自私自利", "培養恭敬、關愛、責任感等品德", "培養盲目服從", "培養反叛精神"], correctAnswer: 1,
+                explanation: "孔子對孝道的闡述有助於培養個人恭敬、關愛、責任感等品德，是個人品德修養的重要環節。", hints: ["提示：孝道的育人作用。"]
+            },
+            {
+                id: 'x67', topic: '論孝', question: "「事父母幾諫」這句話，體現了孔子對孝順的哪種靈活態度？",
+                options: ["固定不變", "因時制宜，注重實效", "只重形式", "只重結果"], correctAnswer: 1,
+                explanation: "體現了孔子因時制宜，注重實效的靈活態度，規勸方式應視情況而定。", hints: ["提示：孝順的智慧。"]
+            },
+            {
+                id: 'x68', topic: '論孝', question: "「勞而不怨」這句話，對子女在面對父母過失時的情緒管理有何啟示？",
+                options: ["應當壓抑所有情緒", "應當表達不滿", "應當學會管理負面情緒，不讓其影響親情", "應當完全無視父母的過失"], correctAnswer: 2,
+                explanation: "啟示子女應學會管理負面情緒，不讓其轉化為怨恨，從而維護親情。", hints: ["提示：情緒的智慧。"]
+            },
+            {
+                id: 'x69', topic: '論孝', question: "「父母之年，不可不知也」這句話，強調了子女對父母的哪種主動性？",
+                options: ["被動接受", "主動關懷與了解", "主動遠離", "主動抱怨"], correctAnswer: 1,
+                explanation: "強調子女應主動關懷與了解父母的年齡和生命狀態。", hints: ["提示：孝順的積極性。"]
+            },
+            {
+                id: 'x70', topic: '論孝', question: "在《論語》中，孔子對孝道的闡述，是否僅限於家庭內部？",
+                options: ["是", "否", "部分是", "不確定"], correctAnswer: 1,
+                explanation: "否。孝道是仁的基礎，其精神可推廣至社會，影響人際關係和國家治理。", hints: ["提示：孝道的推廣性。"]
+            },
+            {
+                id: 'x71', topic: '論孝', question: "「無違」的原則，在現代社會中如何幫助我們處理家庭矛盾？",
+                options: ["避免所有矛盾", "鼓勵盲目服從", "提醒我們在處理矛盾時，仍需遵循基本倫理與尊重", "鼓勵子女反抗父母"], correctAnswer: 2,
+                explanation: "提醒我們在處理家庭矛盾時，仍需遵循基本倫理與尊重，不違背大原則。", hints: ["提示：解決矛盾的原則。"]
+            },
+            {
+                id: 'x72', topic: '論孝', question: "「今之孝者，是謂能養」這句話，對我們理解孝道的演變有何啟示？",
+                options: ["孝道從未改變", "孝道的理解會隨著時代發展而變化", "孝道只關乎物質", "孝道只關乎精神"], correctAnswer: 1,
+                explanation: "啟示孝道的理解會隨著時代發展而變化，但其核心精神應保持不變。", hints: ["提示：孝道的時代性。"]
+            },
+            {
+                id: 'x73', topic: '論孝', question: "孔子對孝道的闡述，與其「禮」的思想有何關聯？",
+                options: ["孝與禮無關", "孝是禮的具體表現和實踐", "禮是孝的阻礙", "禮是孝的結果"], correctAnswer: 1,
+                explanation: "孝是禮的具體表現和實踐，孝行必須符合禮的規範。", hints: ["提示：孝與禮的關係。"]
+            },
+            {
+                id: 'x74', topic: '論孝', question: "「事父母幾諫」這句話，對子女在面對父母錯誤時的責任有何啟示？",
+                options: ["子女沒有責任指出錯誤", "子女有責任指出錯誤，但要講究方式方法", "子女應當無視錯誤", "子女應當嚴厲批評錯誤"], correctAnswer: 1,
+                explanation: "啟示子女有責任指出父母錯誤，但要講究方式方法，以維護親情。", hints: ["提示：子女的責任。"]
+            },
+            {
+                id: 'x75', topic: '論孝', question: "「見志不從，又敬不違，勞而不怨」這句話，對子女的心理健康有何啟示？",
+                options: ["會導致心理壓抑", "有助於培養良好的情緒管理能力", "會導致親子關係緊張", "會讓子女感到無力"], correctAnswer: 1,
+                explanation: "有助於培養子女良好的情緒管理能力，即使面對挫折也能保持積極心態。", hints: ["提示：情緒的健康。"]
+            },
+            {
+                id: 'x76', topic: '論孝', question: "「父母之年，一則以喜，一則以懼」這句話，對子女的生命觀有何啟示？",
+                options: ["生命是永恆的", "生命是有限的，應珍惜當下", "生命是痛苦的", "生命是無意義的"], correctAnswer: 1,
+                explanation: "啟示子女應認識到生命的有限性，珍惜與父母相處的當下時光。", hints: ["提示：生命的價值。"]
+            },
+            {
+                id: 'x77', topic: '論孝', question: "孔子對孝道的闡述，對社會穩定有何貢獻？",
+                options: ["導致社會混亂", "促進家庭和睦，進而穩定社會秩序", "鼓勵個人主義", "削弱社會凝聚力"], correctAnswer: 1,
+                explanation: "孔子對孝道的闡述促進家庭和睦，進而穩定社會秩序，是社會穩定的重要基石。", hints: ["提示：孝道的社會功能。"]
+            },
+            {
+                id: 'x78', topic: '論孝', question: "「無違」的原則，在現代社會中如何平衡子女的獨立性？",
+                options: ["完全限制子女獨立", "在不違背基本倫理的前提下，鼓勵子女獨立思考和行動", "鼓勵子女反抗父母", "要求子女完全依賴父母"], correctAnswer: 1,
+                explanation: "在現代社會中，應平衡子女的獨立性，在不違背基本倫理的前提下，鼓勵子女獨立思考和行動。", hints: ["提示：獨立與孝順的平衡。"]
+            },
+            {
+                id: 'x79', topic: '論孝', question: "「犬馬皆能有養」這句話，對我們理解「敬」的重要性有何啟示？",
+                options: ["物質供養不重要", "敬意是區分人與動物孝順的關鍵", "動物也能有敬意", "敬意是次要的"], correctAnswer: 1,
+                explanation: "啟示敬意是區分人與動物孝順的關鍵，沒有敬意，孝順就失去了其人倫價值。", hints: ["提示：敬意的核心作用。"]
+            },
+            {
+                id: 'x80', topic: '論孝', question: "孔子對孝道的闡述，對個人成長有何積極影響？",
+                options: ["阻礙個人發展", "培養責任感、同理心和感恩之心", "導致自我中心", "鼓勵逃避責任"], correctAnswer: 1,
+                explanation: "孔子對孝道的闡述有助於培養個人責任感、同理心和感恩之心，促進個人成長。", hints: ["提示：孝道的成長作用。"]
+            },
+
+            // 論君子 (繼續擴充至總數180題)
+            {
+                id: 'j66', topic: '論君子', question: "「君子不重則不威」中，「不重」會導致什麼後果？",
+                options: ["失去朋友", "學問不鞏固", "無法成就大事", "容易被欺騙"], correctAnswer: 1,
+                explanation: "君子不莊重，所學的知識就不會牢固。", hints: ["提示：莊重與學問的關係。"]
+            },
+            {
+                id: 'j67', topic: '論君子', question: "君子交友時，為何要「無友不如己者」？",
+                options: ["為了顯示自己高人一等", "為了互相學習，共同進步", "為了避免麻煩", "為了擴大勢力"], correctAnswer: 1,
+                explanation: "君子與忠誠信實、品德高尚的人交往，可以互相學習，共同進步。", hints: ["提示：交友的目的。"]
+            },
+            {
+                id: 'j68', topic: '論君子', question: "君子面對過錯時，為何要「勿憚改」？",
+                options: ["因為害怕懲罰", "因為知錯能改是美德，有助於完善自身", "因為不改會被他人嘲笑", "因為改過很簡單"], correctAnswer: 1,
+                explanation: "知錯能改是君子不斷完善自身品德的重要標誌。", hints: ["提示：改過的價值。"]
+            },
+            {
+                id: 'j69', topic: '論君子', question: "「君子恥其言而過其行」強調了君子的哪種品質？",
+                options: ["善於言辭", "注重實踐，言行一致", "謙虛謹慎", "不說話"], correctAnswer: 1,
+                explanation: "君子以言論多於行動為恥，強調注重實際行動、言行一致。", hints: ["提示：君子的行動力。"]
+            },
+            {
+                id: 'j70', topic: '論君子', question: "「君子坦蕩蕩，小人長戚戚」這句話，對我們理解心境的重要性有何啟示？",
+                options: ["心境不重要", "心境影響個人幸福和品格", "心境由外物決定", "心境無法改變"], correctAnswer: 1,
+                explanation: "啟示心境對個人幸福和品格有重要影響，君子心胸寬廣，小人患得患失。", hints: ["提示：心境的影響。"]
+            },
+            {
+                id: 'j71', topic: '論君子', question: "君子行為的「義以為質」中，「義」的含義是什麼？",
+                options: ["利益", "正義、合宜", "儀式", "友情"], correctAnswer: 1,
+                explanation: "「義」指正義、合宜，是君子行為的內在原則和根本。", hints: ["提示：行為的內在準則。"]
+            },
+            {
+                id: 'j72', topic: '論君子', question: "君子行為的「禮以行之」中，「禮」的含義是什麼？",
+                options: ["禮物", "禮貌、禮節", "儀式", "規則"], correctAnswer: 1,
+                explanation: "「禮」指禮貌、禮節，是君子行為的外在規範。", hints: ["提示：行為的外在表現。"]
+            },
+            {
+                id: 'j73', topic: '論君子', question: "君子行為的「孫以出之」中，「孫」的含義是什麼？",
+                options: ["子孫", "謙遜", "恭順", "順從"], correctAnswer: 1,
+                explanation: "「孫」通「遜」，指謙遜的態度。", hints: ["提示：表達的態度。"]
+            },
+            {
+                id: 'j74', topic: '論君子', question: "君子行為的「信以成之」中，「信」的含義是什麼？",
+                options: ["相信", "誠實、信用", "書信", "信息"], correctAnswer: 1,
+                explanation: "「信」指誠實、信用，是完成事情的保障。", hints: ["提示：行為的可靠性。"]
+            },
+            {
+                id: 'j75', topic: '論君子', question: "君子為何「不病人之不己知也」？",
+                options: ["因為他們不在乎他人看法", "因為他們更注重自身能力的提升和內在修養", "因為他們認為自己不需要被了解", "因為他們知道總會有人了解自己"], correctAnswer: 1,
+                explanation: "君子更注重內在的修養和能力的提升，而非外在的評價和名聲。", hints: ["提示：君子的價值觀。"]
+            },
+            {
+                id: 'j76', topic: '論君子', question: "君子「成人之美」的行為，對社會風氣有何積極影響？",
+                options: ["助長惡行", "促進互助友愛，形成良好社會風氣", "導致自私自利", "加劇競爭"], correctAnswer: 1,
+                explanation: "君子樂於成全他人的好事，有助於促進互助友愛，形成良好社會風氣。", hints: ["提示：君子的社會影響。"]
+            },
+            {
+                id: 'j77', topic: '論君子', question: "小人「成人之惡」的行為，對社會風氣有何負面影響？",
+                options: ["促進和諧", "導致道德敗壞，破壞社會秩序", "增加社會凝聚力", "提升個人聲望"], correctAnswer: 1,
+                explanation: "小人促成他人的壞事，會導致道德敗壞，破壞社會秩序。", hints: ["提示：小人的社會破壞力。"]
+            },
+            {
+                id: 'j78', topic: '論君子', question: "《論語》作為語錄體著作，其語言風格有何特點？",
+                options: ["華麗辭藻，修辭複雜", "淺白精煉，接近口語", "深奧難懂，晦澀難明", "冗長重複，缺乏變化"], correctAnswer: 1,
+                explanation: "《論語》的語言風格淺白精煉，接近口語，便於傳播和理解。", hints: ["提示：語言的特點。"]
+            },
+            {
+                id: 'j79', topic: '論君子', question: "「君子坦蕩蕩，小人長戚戚」這句話，在修辭上運用了什麼手法？",
+                options: ["誇張", "排比", "對比", "比喻"], correctAnswer: 2,
+                explanation: "這句話運用了對比手法，鮮明地對照了君子和小人的心境。", hints: ["提示：兩種不同人格的對照。"]
+            },
+            {
+                id: 'j80', topic: '論君子', question: "君子在修身養性方面，為何要「不憂不懼」？",
+                options: ["因為他們沒有煩惱", "因為他們內省無疚，心胸坦蕩", "因為他們不關心世事", "因為他們有權有勢"], correctAnswer: 1,
+                explanation: "君子內省無疚，心胸坦蕩，所以沒有憂愁和恐懼。", hints: ["提示：內心的平靜。"]
+            },
+            {
+                id: 'j81', topic: '論君子', question: "「恥其言而過其行」這句話，對我們現代人有何啟示？",
+                options: ["多說少做", "言行一致，重實踐", "只說不做", "多做少說"], correctAnswer: 1,
+                explanation: "啟示我們應當言行一致，注重實際行動，避免空談。", hints: ["提示：言行的關係。"]
+            },
+            {
+                id: 'j82', topic: '論君子', question: "「義以為質，禮以行之，孫以出之，信以成之」這句話，概括了君子行為的哪些方面？",
+                options: ["動機、方法、態度、結果", "思想、言語、行動、情感", "內在、外在、表達、完成", "學習、交友、改過、修身"], correctAnswer: 2,
+                explanation: "這句話概括了君子行為的內在根本（義）、外在實行（禮）、表達態度（孫）和完成保障（信）。", hints: ["提示：君子行為的完整體系。"]
+            },
+            {
+                id: 'j83', topic: '論君子', question: "君子為何「不病人之不己知也」，而「病無能焉」？",
+                options: ["因為他們自負", "因為他們更關注自身能力的不足，而非他人評價", "因為他們不喜歡被關注", "因為他們認為能力不重要"], correctAnswer: 1,
+                explanation: "君子更關注自身能力的不足，努力提升自我，而非在意他人是否了解或認可。", hints: ["提示：君子的關注點。"]
+            },
+            {
+                id: 'j84', topic: '論君子', question: "「君子成人之美，不成人之惡」這句話，對人際關係有何積極影響？",
+                options: ["導致競爭加劇", "促進互相幫助，建立良好關係", "導致人際疏離", "鼓勵自私自利"], correctAnswer: 1,
+                explanation: "促進互相幫助，建立良好的人際關係，營造積極向上的氛圍。", hints: ["提示：人際關係的原則。"]
+            },
+            {
+                id: 'j85', topic: '論君子', question: "《論語》中對君子和小人的區分，主要基於什麼？",
+                options: ["財富地位", "學識高低", "道德品格", "外貌特徵"], correctAnswer: 2,
+                explanation: "《論語》主要基於道德品格來區分君子和小人。", hints: ["提示：區分的標準。"]
+            },
+            {
+                id: 'j86', topic: '論君子', question: "孔子對君子的定義，是單一的還是多方面的？",
+                options: ["單一的", "多方面的", "模糊的", "不確定的"], correctAnswer: 1,
+                explanation: "孔子對君子的定義是多方面的，涵蓋了修身、處世、交友、學習等多個層面。", hints: ["提示：君子品格的廣度。"]
+            },
+            {
+                id: 'j87', topic: '論君子', question: "「君子不重則不威」這句話，對領導者有何啟示？",
+                options: ["領導者應當隨和", "領導者應當保持莊重，樹立威信", "領導者應當嚴厲", "領導者應當幽默"], correctAnswer: 1,
+                explanation: "啟示領導者應當保持莊重，樹立威信，才能服眾。", hints: ["提示：領導力的要素。"]
+            },
+            {
+                id: 'j88', topic: '論君子', question: "「無友不如己者」的兩種解釋，都體現了君子在交友方面的什麼目的？",
+                options: ["追求利益", "提升自我", "避免衝突", "擴大影響力"], correctAnswer: 1,
+                explanation: "無論是擇友以進，還是保持謙遜，都旨在提升自我修養。", hints: ["提示：交友的深層目的。"]
+            },
+            {
+                id: 'j89', topic: '論君子', question: "君子「過而能改」的行為，對個人成長有何積極意義？",
+                options: ["阻礙成長", "促進自我反省和進步", "導致自卑", "讓人停滯不前"], correctAnswer: 1,
+                explanation: "促進個人自我反省和進步，不斷完善自身。", hints: ["提示：改過的積極作用。"]
+            },
+            {
+                id: 'j90', topic: '論君子', question: "「君子坦蕩蕩」和「小人長戚戚」的對比，強調了什麼？",
+                options: ["貧富差距", "社會地位差異", "內心境界與道德修養的差異", "外貌差異"], correctAnswer: 2,
+                explanation: "強調了君子和小人在內心境界與道德修養上的根本差異。", hints: ["提示：核心區別。"]
+            },
+        ];
+
+        let quizQuestions = []; // Array to hold questions for the current quiz
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOptionText = ''; // Store selected option text for comparison
+        let quizStarted = false;
+        let selectedQuestionCount = 'all'; // Default to all questions
+        let isTimedMode = false;
+        let timerInterval;
+        let timeLeft = 30; // Seconds for timed mode
+        let incorrectlyAnsweredQuestionPool = []; // To store question objects of incorrectly answered questions for re-presentation
+        let questionsAnsweredSinceLastRetry = 0; // Counter for retry delay
+        let isReAttempting = false; // State for timed mode re-attempt
+
+        // Get DOM elements
+        const startScreen = document.getElementById('startScreen');
+        const userNameInput = document.getElementById('userNameInput');
+        const nameInputError = document.getElementById('nameInputError');
+        const startButton = document.getElementById('startButton');
+        const questionCountOptions = document.getElementById('questionCountOptions');
+        const quizArea = document.getElementById('quizArea');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        // deepInterpretationButton removed
+        const nextButton = document.getElementById('nextButton');
+        const resultScreen = document.getElementById('resultScreen');
+        const finalScoreText = document.getElementById('finalScoreText');
+        const finalCommentText = document.getElementById('finalCommentText');
+        const saveStatusMessage = document.getElementById('saveStatusMessage');
+        const restartButton = document.getElementById('restartButton');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const progressDisplay = document.getElementById('progressDisplay');
+        // interpretationModal, closeModalButton, interpretationText, interpretationLoader removed
+
+        // Event Listeners
+        startButton.addEventListener('click', startGame);
+        nextButton.addEventListener('click', handleNextButton);
+        restartButton.addEventListener('click', restartQuiz);
+        // deepInterpretationButton.addEventListener removed
+        // closeModalButton.addEventListener removed
+        // window.addEventListener for interpretationModal removed
+
+        // Event listener for question count buttons
+        questionCountOptions.addEventListener('click', (event) => {
+            if (event.target.classList.contains('question-count-button')) {
+                // Remove 'selected-count' from all buttons
+                Array.from(questionCountOptions.children).forEach(button => {
+                    button.classList.remove('selected-count');
+                });
+                // Add 'selected-count' to the clicked button
+                event.target.classList.add('selected-count');
+                selectedQuestionCount = event.target.dataset.count;
+            }
+        });
+
+        /**
+         * Shuffles an array in place using the Fisher-Yates (Knuth) algorithm.
+         * @param {Array} array The array to shuffle.
+         * @returns {Array} The shuffled array.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            userName = userNameInput.value.trim();
+            if (userName === "") {
+                nameInputError.classList.remove('hidden');
+                return; // Prevent game start if name is empty
+            } else {
+                nameInputError.classList.add('hidden');
+            }
+
+            quizStarted = true;
+            startScreen.classList.add('hidden');
+            quizArea.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            incorrectlyAnsweredQuestionPool = []; // Clear for new game
+            questionsAnsweredSinceLastRetry = 0;
+            isReAttempting = false;
+
+            // Determine if timed mode
+            isTimedMode = (selectedQuestionCount === '50_timed');
+
+            // Prepare quiz questions based on selection and shuffle
+            let shuffledAllQuestions = shuffleArray([...allQuestions]); // Create a shuffled copy
+            if (selectedQuestionCount === 'all') {
+                quizQuestions = shuffledAllQuestions;
+            } else if (isTimedMode) {
+                quizQuestions = shuffledAllQuestions.slice(0, 50); // Fixed 50 questions for timed mode
+            } else {
+                const count = parseInt(selectedQuestionCount);
+                quizQuestions = shuffledAllQuestions.slice(0, count);
+            }
+
+            loadQuestion();
+            updateProgressDisplay();
+            scoreDisplay.textContent = `得分: ${score}`;
+        }
+
+        function loadQuestion() {
+            resetState();
+
+            let questionToAsk;
+            let fromRetryPool = false;
+
+            // Logic to re-ask incorrectly answered questions after a delay (15-30 questions)
+            // We'll use a simpler approximation: if there are questions in the pool and we've answered
+            // at least 5 new questions since the last retry, we have a chance to pull from the pool.
+            if (incorrectlyAnsweredQuestionPool.length > 0 && questionsAnsweredSinceLastRetry >= 5) {
+                // Randomly decide if we pull from retry pool
+                if (Math.random() < 0.5) { // 50% chance to pull a retry question
+                    const retryQIndex = Math.floor(Math.random() * incorrectlyAnsweredQuestionPool.length);
+                    questionToAsk = incorrectlyAnsweredQuestionPool.splice(retryQIndex, 1)[0]; // Remove and get it
+                    fromRetryPool = true;
+                    questionsAnsweredSinceLastRetry = 0; // Reset counter after pulling from retry
+                }
+            }
+
+            if (!questionToAsk) { // If not pulling from retry pool, or pool is empty/delay not met
+                if (currentQuestionIndex < quizQuestions.length) {
+                    questionToAsk = quizQuestions[currentQuestionIndex];
+                } else if (incorrectlyAnsweredQuestionPool.length > 0) {
+                    // All initial questions exhausted, but there are still retries. Force retry.
+                    const retryQIndex = Math.floor(Math.random() * incorrectlyAnsweredQuestionPool.length);
+                    questionToAsk = incorrectlyAnsweredQuestionPool.splice(retryQIndex, 1)[0];
+                    fromRetryPool = true;
+                    questionsAnsweredSinceLastRetry = 0; // Reset counter
+                } else {
+                    showResult(); // All questions and retries exhausted
+                    return;
+                }
+            }
+
+            // Store the current question being displayed for checkAnswer
+            window.currentDisplayedQuestion = questionToAsk;
+
+            questionText.textContent = questionToAsk.question;
+
+            // Shuffle options for the current question
+            const shuffledOptions = shuffleArray([...questionToAsk.options]);
+
+            optionsContainer.innerHTML = ''; // Clear previous options
+            shuffledOptions.forEach((option) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button');
+                button.dataset.optionText = option; // Store the option text for comparison
+                button.addEventListener('click', selectOption);
+                optionsContainer.appendChild(button);
+            });
+
+            // deepInterpretationButton.classList.add('hidden'); // Removed
+            nextButton.textContent = '檢查答案';
+            nextButton.disabled = false; // Enable next button for checking
+
+            if (isTimedMode) {
+                timerDisplay.classList.remove('hidden');
+                startTimer();
+            } else {
+                timerDisplay.classList.add('hidden');
+            }
+        }
+
+        function resetState() {
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+            feedbackMessage.textContent = '';
+            feedbackMessage.classList.remove('feedback-correct', 'feedback-incorrect');
+            selectedOptionText = ''; // Reset selected option text
+            stopTimer(); // Stop any running timer
+            isReAttempting = false; // Reset re-attempt state
+            // Re-enable option buttons (will be disabled again by checkAnswer)
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = false;
+                button.classList.remove('selected', 'correct', 'incorrect'); // Clear styling
+            });
+        }
+
+        function startTimer() {
+            timeLeft = 30;
+            timerDisplay.textContent = `剩餘時間: ${timeLeft} 秒`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `剩餘時間: ${timeLeft} 秒`;
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    autoCheckAnswer();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function selectOption(event) {
+            // Allow re-selection before checkAnswer
+            const buttons = optionsContainer.children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('selected');
+            }
+            event.target.classList.add('selected');
+            selectedOptionText = event.target.dataset.optionText; // Store the text of the selected option
+        }
+
+        function handleNextButton() {
+            if (nextButton.textContent === '檢查答案' || nextButton.textContent === '再次嘗試') {
+                checkAnswer();
+            } else { // Next question
+                if (!isReAttempting) { // Only increment if not in a re-attempt flow
+                    currentQuestionIndex++;
+                }
+                loadQuestion();
+                updateProgressDisplay();
+            }
+        }
+
+        function autoCheckAnswer() {
+            // Simulate a selection if time runs out without user input
+            if (selectedOptionText === '') {
+                selectedOptionText = 'NO_SELECTION'; // A dummy value to indicate no selection
+            }
+            checkAnswer();
+        }
+
+        function checkAnswer() {
+            const displayedQuestion = window.currentDisplayedQuestion; // Get the currently displayed question
+            const correctOptionText = displayedQuestion.options[displayedQuestion.correctAnswer];
+            const buttons = optionsContainer.children;
+
+            // Disable all option buttons after checking
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+            }
+
+            if (selectedOptionText === correctOptionText) {
+                stopTimer(); // Stop timer on correct answer
+                if (!isReAttempting) { // Only score if it's the first attempt
+                    score++;
+                }
+                scoreDisplay.textContent = `得分: ${score}`;
+                feedbackMessage.textContent = `恭喜你，答對了！\n\n${displayedQuestion.explanation.substring(0, 100)}`; // Max 100 chars
+                feedbackMessage.classList.add('feedback-correct');
+                const selectedButton = Array.from(buttons).find(btn => btn.dataset.optionText === selectedOptionText);
+                if (selectedButton) selectedButton.classList.add('correct');
+
+                // If correctly answered, remove from retry pool if it was there
+                const indexInPool = incorrectlyAnsweredQuestionPool.findIndex(q => q.id === displayedQuestion.id);
+                if (indexInPool > -1) {
+                    incorrectlyAnsweredQuestionPool.splice(indexInPool, 1);
+                }
+                questionsAnsweredSinceLastRetry++; // Increment counter for retry delay
+
+                nextButton.textContent = '下一題';
+                nextButton.disabled = false;
+                isReAttempting = false; // Reset re-attempt state
+            } else { // Incorrect answer
+                if (isTimedMode && !isReAttempting) { // First incorrect attempt in timed mode
+                    isReAttempting = true;
+                    stopTimer(); // Stop current timer
+                    startTimer(); // Restart timer for re-attempt
+                    feedbackMessage.textContent = `答錯了，請再試一次！\n提示：${displayedQuestion.hints[0] || '再想想看。'}`;
+                    feedbackMessage.classList.add('feedback-incorrect');
+                    if (selectedOptionText !== 'NO_SELECTION') {
+                        const selectedButton = Array.from(buttons).find(btn => btn.dataset.optionText === selectedOptionText);
+                        if (selectedButton) selectedButton.classList.add('incorrect');
+                    }
+                    // Re-enable options for re-attempt
+                    Array.from(buttons).forEach(button => {
+                        button.disabled = false;
+                        button.classList.remove('selected', 'incorrect'); // Clear selected/incorrect styling
+                    });
+                    selectedOptionText = ''; // Clear selected option for new attempt
+                    nextButton.textContent = '再次嘗試';
+                    nextButton.disabled = false;
+                } else { // Second incorrect attempt in timed mode, or incorrect in non-timed mode
+                    stopTimer(); // Stop timer
+                    feedbackMessage.textContent = `很可惜，答錯了。\n\n正確答案是：${correctOptionText}\n\n${displayedQuestion.explanation.substring(0, 100)}`; // Max 100 chars
+                    feedbackMessage.classList.add('feedback-incorrect');
+                    if (selectedOptionText !== 'NO_SELECTION') {
+                        const selectedButton = Array.from(buttons).find(btn => btn.dataset.optionText === selectedOptionText);
+                        if (selectedButton) selectedButton.classList.add('incorrect');
+                    }
+                    const correctButton = Array.from(buttons).find(btn => btn.dataset.optionText === correctOptionText);
+                    if (correctButton) correctButton.classList.add('correct'); // Highlight correct answer
+
+                    // Add to retry pool if not already there
+                    const indexInPool = incorrectlyAnsweredQuestionPool.findIndex(q => q.id === displayedQuestion.id);
+                    if (indexInPool === -1) {
+                        incorrectlyAnsweredQuestionPool.push(displayedQuestion);
+                    }
+                    questionsAnsweredSinceLastRetry++; // Increment counter for retry delay
+
+                    nextButton.textContent = '下一題';
+                    nextButton.disabled = false;
+                    isReAttempting = false; // Reset re-attempt state
+                }
+            }
+            // deepInterpretationButton.classList.remove('hidden'); // Removed
+        }
+
+        function updateProgressDisplay() {
+            // Progress display should reflect initial quiz questions only
+            progressDisplay.textContent = `進度: ${currentQuestionIndex + 1}/${quizQuestions.length}`;
+            if (incorrectlyAnsweredQuestionPool.length > 0) {
+                progressDisplay.textContent += ` (待重答: ${incorrectlyAnsweredQuestionPool.length} 題)`;
+            }
+        }
+
+        async function showResult() {
+            quizArea.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScoreText.textContent = `您的最終得分是：${score} / ${quizQuestions.length}`;
+
+            let comment = '';
+            const percentage = (score / quizQuestions.length) * 100;
+            if (percentage === 100) {
+                comment = '太棒了！您對論語的理解非常透徹，孔子會為您驕傲的！';
+            } else if (percentage >= 75) {
+                comment = '表現出色！您對論語有很好的掌握，再接再厲！';
+            } else if (percentage >= 50) {
+                comment = '不錯的開始！繼續學習，您會更棒的！';
+            } else {
+                comment = '別灰心，論語的智慧博大精深，多加練習會有所提升的！';
+            }
+            finalCommentText.textContent = comment;
+
+            // Save score to Firestore
+            if (db && userId !== 'loading...' && userId !== 'authentication-failed') {
+                saveStatusMessage.textContent = '正在儲存得分...';
+                try {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/quiz_scores`), {
+                        userId: userId,
+                        userName: userName, // Save user's name
+                        score: score,
+                        totalQuestions: quizQuestions.length,
+                        timestamp: serverTimestamp()
+                    });
+                    saveStatusMessage.textContent = '得分已成功儲存！';
+                } catch (e) {
+                    console.error("儲存得分時出錯: ", e);
+                    saveStatusMessage.textContent = '儲存得分失敗。';
+                }
+            } else {
+                saveStatusMessage.textContent = '未配置Firebase或使用者ID無效，無法儲存得分。';
+            }
+        }
+
+        function restartQuiz() {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden'); // Go back to start screen
+            userNameInput.value = ''; // Clear previous name
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedOptionText = '';
+            quizStarted = false;
+            isTimedMode = false;
+            stopTimer(); // Ensure timer is stopped
+            timerDisplay.classList.add('hidden'); // Hide timer
+            saveStatusMessage.textContent = ''; // Clear save status
+            incorrectlyAnsweredQuestionPool = []; // Clear for new game
+            questionsAnsweredSinceLastRetry = 0;
+            isReAttempting = false;
+            // Reset selected question count button to default '全部'
+            Array.from(questionCountOptions.children).forEach(button => {
+                button.classList.remove('selected-count');
+                if (button.dataset.count === 'all') {
+                    button.classList.add('selected-count');
+                    selectedQuestionCount = 'all';
+                }
+            });
+        }
+
+        // Deep interpretation functions removed as per user request
+        // async function showDeepInterpretation() { ... }
+        // function hideDeepInterpretation() { ... }
+
+        // Initial setup on window load
+        window.onload = function() {
+            // The Firebase auth state listener will update userIdDisplay.
+            // No need to load question here, as it's handled by startGame.
+        };
+
+    </script>
+</body>
+</html>
